@@ -1,6 +1,6 @@
 <?php
 
-function storeView(&$store, &$cart, &$state): void
+function storeView(array $store, int &$state): void
 {
 
     echo "STORE VIEW\n";
@@ -32,7 +32,7 @@ function storeView(&$store, &$cart, &$state): void
 
 }
 
-function storeTake(array &$store, array &$cart, int &$state)
+function storeTake(array &$store, array &$cart, int &$state): void
 {
     $thingsInStore = [];
     foreach ($store as $index => $product) {
@@ -58,7 +58,7 @@ function storeTake(array &$store, array &$cart, int &$state)
     $state = STATE::STORE_VIEW;
 }
 
-function cartView(array &$store, array &$cart, int &$state): void
+function cartView(array $cart, int &$state): void
 {
     $isCartEmpty = count($cart) <= 0;
 
@@ -104,7 +104,7 @@ function cartView(array &$store, array &$cart, int &$state): void
     }
 }
 
-function cartTake(array &$store, array &$cart, int &$state)
+function cartTake(array &$store, array &$cart, int &$state): void
 {
     $thingsInCart = [];
     foreach ($cart as $index => $product) {
@@ -131,7 +131,7 @@ function cartTake(array &$store, array &$cart, int &$state)
     $state = STATE::CART_VIEW;
 }
 
-function purchase(array $cart, int &$state)
+function purchase(array $cart, int &$state): void
 {
     echo "CHECKOUT VIEW, YOUR CART\n";
     if (count($cart) === 0) {

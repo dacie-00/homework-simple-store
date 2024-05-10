@@ -28,7 +28,7 @@ function copyProducts(array $products): array
     return $copy;
 }
 
-function makeContainerTable($products, $summedPrice = false): array
+function makeContainerTable(array $products, bool $summedPrice = false): array
 {
     $productsView = copyProducts($products);
     if ($summedPrice) {
@@ -55,7 +55,7 @@ function sortProducts(array &$products): void
     });
 }
 
-function addToContainer(&$container, $product, $quantity)
+function addToContainer(array &$container, stdClass $product, int $quantity): void
 {
     foreach ($container as $item) {
         if ($item->name === $product->name) {
@@ -70,7 +70,7 @@ function addToContainer(&$container, $product, $quantity)
     $container[] = $item;
 }
 
-function removeFromContainer(&$container, $product, $quantity)
+function removeFromContainer(array &$container, stdClass $product, int $quantity): void
 {
     foreach ($container as $index => $item) {
         if ($item->name === $product->name) {
@@ -87,7 +87,7 @@ function removeFromContainer(&$container, $product, $quantity)
     throw new InvalidArgumentException("Product not found in container");
 }
 
-function calculateProductTotalPrice($products)
+function calculateProductTotalPrice(array $products): int
 {
     $totalPrice = 0;
     foreach ($products as $item) {

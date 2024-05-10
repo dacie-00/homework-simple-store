@@ -19,7 +19,7 @@ function getProductsFromJSON(string $filePath): array
     return $products;
 }
 
-function validateProductsFromJSON($products)
+function validateProductsFromJSON($products): void
 {
     if (gettype($products) != "array") {
         throw new Exception("JSON products must be in an array");

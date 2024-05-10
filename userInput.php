@@ -12,7 +12,7 @@ function getUserChoiceFromArray(array $choices, string $promptMessage = "input")
     }
 }
 
-function getUserChoiceFromRange(int $min, int $max, string $cancel = null, string $promptMessage = "input")
+function getUserChoiceFromRange(int $min, int $max, string $cancel = null, string $promptMessage = "input"): int
 {
     while (true) {
         $choice = readline(ucfirst("$promptMessage - "));

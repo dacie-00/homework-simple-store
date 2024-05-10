@@ -43,13 +43,13 @@ $state = STATE::STORE_VIEW;
 while (true) {
     switch ($state) {
         case STATE::STORE_VIEW:
-            storeView($storeProducts, $cart, $state);
+            storeView($storeProducts, $state);
             break;
         case STATE::STORE_TAKE:
             storeTake($storeProducts, $cart, $state);
             break;
         case STATE::CART_VIEW:
-            cartView($storeProducts, $cart, $state);
+            cartView($cart, $state);
             break;
         case STATE::CART_TAKE:
             cartTake($storeProducts, $cart, $state);
