@@ -18,148 +18,31 @@
 
 declare(strict_types=1);
 
-function getProductsFromJSON(string $filePath): array {
-    if (!file_exists($filePath)) {
-        throw new Exception("$filePath JSON file not found");
-    }
+require_once ("Table.php");
+require_once ("json.php");
+require_once ("userInput.php");
 
-    $products = json_decode(file_get_contents($filePath));
-
-    if (!isset($products)) {
-        throw new Exception("JSON file - $filePath could not be decoded");
-    }
-
-    if (!is_array($products)) {
-        throw new Exception("Incorrect JSON file format - $filePath");
-    }
-
-    return $products;
-}
-
-class Table {
-    static function calculateColumnWidths(array $columns): array
-    {
-        $widths = [];
-        foreach ($columns as $column) {
-            $titleWidth = strlen($column->title);
-            $maxWidth = array_reduce($column->content, function ($carry, $item) {return max(strlen($item), $carry);}, 0);
-            $widths[] = max($maxWidth, $titleWidth);
-        }
-        return $widths;
-    }
-
-    static function displayRow(array $elements, array $widths, string $padString, $separator): void {
-        foreach ($elements as $index => $element) {
-            $maxLength = $widths[$index];
-            $wordLength = strlen($element);
-            if ($wordLength != $maxLength) {
-                $padLeft = str_repeat($padString, (int) floor(($maxLength - $wordLength) / 2 + 1));
-                $padRight = str_repeat($padString, (int) ceil(($maxLength - $wordLength) / 2 + 1));
-                echo "{$padLeft}$element{$padRight}$separator";
-                continue;
-            }
-            echo "{$padString}$element{$padString}$separator";
-        }
-    }
-
-    static function display(array $columns): void {
-        $padString = " ";
-        $separator = "|";
-
-        $titles = [];
-        foreach ($columns as $column) {
-            $titles[] = $column->title;
-        }
-
-        $widths = self::calculateColumnWidths($columns);
-        $totalWidth = array_sum($widths) + count($columns) * strlen($padString) * 2 + count($columns);
-
-        self::displayRow($titles, $widths, $padString, $separator);
-        echo "\n";
-        echo str_repeat("=", $totalWidth);
-        echo "\n";
-
-        $rowCount = count($columns[0]->content);
-        for ($i = 0; $i < $rowCount; $i++) {
-            $row = [];
-            foreach ($columns as $column) {
-                $row[] = $column->content[$i];
-            }
-            self::displayRow($row, $widths, $padString, $separator);
-            echo "\n";
-        }
-    }
-
-    static function createColumn($title, $content): stdClass {
-        $column = new stdClass();
-        $column->title = $title;
-        $column->content = $content;
-        return $column;
-    }
-}
-
-function validateProduct(stdClass $product, int $index): void {
-    if (!isset($product->name)) {
-        throw new Exception("Product name is required for product #$index");
-    }
-    if (!isset($product->price)) {
-        throw new Exception("Product '$product->name' has missing price");
-    }
-    if (!isset($product->quantity)) {
-        throw new Exception("Product '$product->name' has missing quantity");
-    }
-    if (strlen($product->name) === 0) {
-        throw new Exception("Product name cannot be empty string for product #$index");
-    }
-    if ($product->quantity <= 0) {
-        throw new Exception("Product '$product->name' has invalid quantity");
-    }
-    if ($product->price <= 0) {
-        throw new Exception("Product '$product->name' has invalid price");
-    }
-}
-
-function sanitizeProduct(stdClass $product): void {
-    if (isset($product->price)) {
-        $product->price = (int) $product->price;
-    }
-    if (isset($product->quantity)) {
-        $product->quantity = (int) $product->quantity;
-    }
-    if (isset($product->name)) {
-        $product->name = (string) $product->name;
-    }
-}
-
-function validateStoreProducts(array $products): void {
-    foreach ($products as $index => $product) {
-        validateProduct($product, $index);
-    }
-}
-
-function sanitizeStoreProducts(array $products): void {
-    foreach ($products as $product) {
-        sanitizeProduct($product);
-    }
-}
-
-function formatCurrency($amount): string {
+function formatCurrency($amount): string
+{
     return '$' . number_format($amount / 100, 2);
 }
 
-function formatCurrencyForProducts(array $products): void {
+function formatCurrencyForProducts(array $products): void
+{
     foreach ($products as $product) {
         $product->price = formatCurrency($product->price);
     }
 }
 
-function addProductIds(array $products): void {
+function addProductIds(array $products): void
+{
     foreach ($products as $index => $product) {
-        $product->id = (string) ($index + 1);
+        $product->id = (string)($index + 1);
     }
 }
 
-function copyProducts(array $products): array {
+function copyProducts(array $products): array
+{
     $copy = [];
     foreach ($products as $product) {
         $copy[] = clone $product;
@@ -167,19 +50,23 @@ function copyProducts(array $products): array {
     return $copy;
 }
 
-function makeStoreTable($products): array {
+function makeStoreTable($products): array
+{
     $productsView = copyProducts($products);
     formatCurrencyForProducts($productsView);
     addProductIds($productsView);
     return [
-            Table::createColumn("ID", array_column($productsView, "id")),
-            Table::createColumn("Name", array_column($productsView, "name")),
-            Table::createColumn("Price", array_column($productsView, "price")),
-            Table::createColumn("Quantity", array_map(function($v){return (string) $v;}, array_column($productsView, "quantity")))
-           ];
+        Table::createColumn("ID", array_column($productsView, "id")),
+        Table::createColumn("Name", array_column($productsView, "name")),
+        Table::createColumn("Price", array_column($productsView, "price")),
+        Table::createColumn("Quantity", array_map(function ($v) {
+            return (string)$v;
+        }, array_column($productsView, "quantity")))
+    ];
 }
 
-function makeCartTable($cart): array {
+function makeCartTable($cart): array
+{
     $cartView = copyProducts($cart);
     foreach ($cartView as $product) {
         $product->price = $product->price * $product->quantity;
@@ -190,23 +77,26 @@ function makeCartTable($cart): array {
         Table::createColumn("ID", array_column($cartView, "id")),
         Table::createColumn("Name", array_column($cartView, "name")),
         Table::createColumn("Price", array_column($cartView, "price")),
-        Table::createColumn("Quantity", array_map(function($v){return (string) $v;}, array_column($cartView, "quantity")))
+        Table::createColumn("Quantity", array_map(function ($v) {
+            return (string)$v;
+        }, array_column($cartView, "quantity")))
     ];
 }
 
-// I can't test other methods on Windows, so I'm using the cheap method just because I know it works.
 function clearScreen()
 {
+    return;
+    // I can't test other methods on Windows, so I'm using the hacky method just because I know it works.
     for ($i = 0; $i < 50; $i++) {
         echo "\n";
     }
     echo "\r";
 }
 
-class Simulate {
+class Simulate
+{
     static function store(&$products, &$cart, &$state)
     {
-        clearScreen();
         echo "STORE VIEW\n";
         Table::display(
             makeStoreTable($products)
@@ -238,7 +128,7 @@ class Simulate {
             $thingsInStore = [];
             foreach ($products as $index => $product) {
                 if ($product->quantity > 0) {
-                    $thingsInStore[] = (string) ($index + 1); // + 1 due to range starting at 1 instead of 0
+                    $thingsInStore[] = (string)($index + 1); // + 1 due to range starting at 1 instead of 0
                 }
             }
             echo "Enter the ID of the product you wish to add to your cart ('n' to cancel)\n";
@@ -251,8 +141,8 @@ class Simulate {
                 echo "Enter the quantity (1-$availableQuantity) of $productName you wish to add to your cart ('n' to cancel)\n";
                 $quantity = getUserChoiceFromRange(1, $availableQuantity, "n", "quantity");
                 if ($quantity !== "n") {
-                    $products[$userChoice]->quantity -= $quantity;
-                    addToCart($cart, $products[$userChoice], $quantity);
+                    removeFromContainer($products, $products[$userChoice], $quantity);
+                    addToContainer($cart, $products[$userChoice], $quantity);
                     echo "$quantity $productName added to cart!\n";
                 }
             }
@@ -262,16 +152,28 @@ class Simulate {
 
     static function cart($products, &$cart, &$state)
     {
-//        clearScreen();
-        system("clear");
+        $emptyCart = count($cart) <= 0;
+
         echo "CART VIEW\n";
-        Table::display(
-            makeCartTable($cart)
-        );
+        if ($emptyCart) {
+            echo "Your cart is empty!\n";
+        } else {
+            Table::display(
+                makeCartTable($cart)
+            );
+            $totalPrice = formatCurrency(calculateProductTotalPrice($cart));
 
-        $totalPrice = formatCurrency(calculateProductTotalPrice($cart));
+            echo "The total sum is $totalPrice\n";
+        }
 
-        echo "The total sum is $totalPrice\n";
+
+        if ($emptyCart) {
+            echo "1) Back to store view\n";
+            if (getUserChoiceFromArray(["1"], "choice") == 1) {
+                $state = STATE::STORE_VIEW;
+                return;
+            }
+        }
 
         echo "1) Remove item from cart\n";
         echo "2) View available store items\n";
@@ -293,7 +195,7 @@ class Simulate {
             $thingsInCart = [];
             foreach ($cart as $index => $product) {
                 if ($product->quantity > 0) {
-                    $thingsInCart[] = (string) ($index + 1); // + 1 due to range starting at 1 instead of 0
+                    $thingsInCart[] = (string)($index + 1); // + 1 due to range starting at 1 instead of 0
                 }
             }
             echo "Enter the ID of the product you wish to remove from your cart ('n' to cancel)\n";
@@ -306,8 +208,8 @@ class Simulate {
                 echo "Enter the quantity (1-$availableQuantity) of $productName you wish to remove from your cart ('n' to cancel)\n";
                 $quantity = getUserChoiceFromRange(1, $availableQuantity, "n", "quantity");
                 if ($quantity !== "n") {
-                    removeFromCart($cart, $cart[$userChoice], $quantity);
-                    $products[$userChoice]->quantity += $quantity;
+                    removeFromContainer($cart, $cart[$userChoice], $quantity);
+                    addtoContainer($products, $cart[$userChoice], $quantity);
                     echo "$quantity $productName removed from cart!\n";
                 }
             }
@@ -320,12 +222,19 @@ class Simulate {
         echo "CHECKOUT VIEW, YOUR CART\n";
         if (count($cart) === 0) {
             echo "You have no items in your cart!\n";
-            $state = STATE::STORE_VIEW;
-            return;
+            echo "1) Back to store view\n";
+            if (getUserChoiceFromArray(["1"], "choice") == 1) {
+                $state = STATE::STORE_VIEW;
+                return;
+            }
         }
+
         Table::display(
             makeCartTable($cart)
         );
+
+        $totalPrice = formatCurrency(calculateProductTotalPrice($cart));
+        echo "The total sum is $totalPrice\n";
 
         echo "1) Purchase!\n";
         echo "2) Cancel\n";
@@ -341,22 +250,24 @@ class Simulate {
     }
 }
 
-function addToCart(&$cart, $product, $quantity) {
-    foreach ($cart as $item) {
+function addToContainer(&$container, $product, $quantity)
+{
+    foreach ($container as $item) {
         if ($item->name === $product->name) {
-            $cart[$product->quantity] += $quantity;
+            $item->quantity += $quantity;
             return;
         }
     }
     $item = new stdClass();
-    $index = array_push($cart, $item) - 1;
-    $cart[$index]->name = $product->name;
-    $cart[$index]->quantity = $quantity;
-    $cart[$index]->price = $product->price;
+    $index = array_push($container, $item) - 1;
+    $container[$index]->name = $product->name;
+    $container[$index]->quantity = $quantity;
+    $container[$index]->price = $product->price;
 }
 
-function removeFromCart(&$cart, $product, $quantity) {
-    foreach ($cart as $item) {
+function removeFromContainer(&$container, $product, $quantity)
+{
+    foreach ($container as $item) {
         if ($item->name === $product->name) {
             $item->quantity -= $quantity;
             if ($item->quantity <= 0) {
@@ -366,7 +277,7 @@ function removeFromCart(&$cart, $product, $quantity) {
             return;
         }
     }
-    throw new InvalidArgumentException("Product not found in cart");
+    throw new InvalidArgumentException("Product not found in container");
 }
 
 function calculateProductTotalPrice($products)
@@ -378,43 +289,13 @@ function calculateProductTotalPrice($products)
     return $totalPrice;
 }
 
-function getUserChoiceFromArray(array $choices, string $promptMessage = "input") {
-    while (true) {
-        $choice = readline(ucfirst("$promptMessage - "));
-        if (!in_array($choice, $choices, true)) {
-            echo "Invalid $promptMessage!\n";
-            continue;
-        }
-        return $choice;
-    }
-}
-
-function getUserChoiceFromRange(int $min, int $max, string $cancel = null, string $promptMessage = "input") {
-    while (true) {
-        $choice = readline(ucfirst("$promptMessage - "));
-        if ($choice === $cancel) {
-            return $choice;
-        }
-        if (!is_numeric($choice)) {
-            echo "Invalid $promptMessage!\n";
-            continue;
-        }
-        $choice = (int) $choice;
-        if ($choice < $min || $choice > $max) {
-            echo "Invalid $promptMessage!\n";
-            continue;
-        }
-        return $choice;
-    }
-}
-
 $products = getProductsFromJSON('products.json');
-sanitizeStoreProducts($products);
-validateStoreProducts($products);
+validateProductsFromJSON($products);
 
 $cart = [];
 
-class STATE {
+class STATE
+{
     const STORE_VIEW = 0;
     const CART_VIEW = 1;
     const STORE_TAKE = 2;
