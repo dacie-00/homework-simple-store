@@ -16,8 +16,6 @@
 //
 //!!!! THIS MUST BE DONE IN SEPARATE REPOSITORY !!!!
 
-declare(strict_types=1);
-
 require_once("Table.php");
 require_once("json.php");
 require_once("userInput.php");
