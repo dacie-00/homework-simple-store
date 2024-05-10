@@ -38,13 +38,15 @@ function makeContainerTable(array $products, bool $summedPrice = false): array
     }
     formatCurrencyForProducts($productsView);
     addProductIds($productsView);
+    foreach ($productsView as $product) {
+        $product->quantity = (string)$product->quantity;
+    }
+
     return [
         tableCreateColumn("ID", array_column($productsView, "id")),
         tableCreateColumn("Name", array_column($productsView, "name")),
         tableCreateColumn("Price", array_column($productsView, "price")),
-        tableCreateColumn("Quantity", array_map(function ($v) {
-            return (string)$v;
-        }, array_column($productsView, "quantity")))
+        tableCreateColumn("Quantity", array_column($productsView, "quantity"))
     ];
 }
 
