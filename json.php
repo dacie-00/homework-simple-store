@@ -30,20 +30,22 @@ function validateProductsFromJSON($products)
         throw new Exception("JSON products must be in an array");
     }
 
+    $productCount = count($products);
+
     foreach ($products as $index => $product) {
         if (gettype($product) !== gettype($templateProduct)) {
-            throw new Exception ("JSON product #$index is not an object");
+            throw new Exception ("JSON product #$index/$productCount is not an object");
         }
         foreach ($templateProduct as $templateAttributeKey => $templateAttributeValue) {
             foreach ($product as $productAttributeKey => $productAttributeValue) {
                 if ($productAttributeKey === $templateAttributeKey) {
                     if (gettype($productAttributeValue) !== gettype($templateAttributeValue)) {
-                        throw new Exception ("JSON product #$index has incorrect data type for $templateAttributeKey");
+                        throw new Exception ("JSON product #$index/$productCount has incorrect data type for $templateAttributeKey");
                     }
                     continue 2;
                 }
             }
-            throw new Exception ("JSON product #$index is missing $templateAttributeKey");
+            throw new Exception ("JSON product #$index/$productCount is missing $templateAttributeKey");
         }
     }
 }
