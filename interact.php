@@ -70,7 +70,7 @@ function storeTake(array &$store, array &$cart, int &$state): void
         if ($quantity !== "n") {
             addToContainer($cart, $store[$userChoice], $quantity);
             removeFromContainer($store, $store[$userChoice], $quantity);
-            echo "$quantity $productName added to cart!\n";
+            echo "$quantity $productName has been added to cart!\n";
         }
     }
     $state = STATE::STORE_VIEW;
@@ -143,7 +143,7 @@ function cartTake(array &$store, array &$cart, int &$state): void
             addtoContainer($store, $cart[$userChoice], $quantity);
             removeFromContainer($cart, $cart[$userChoice], $quantity);
             sortProducts($store);
-            echo "$quantity $productName removed from cart!\n";
+            echo "$quantity $productName has been removed from your cart!\n";
         }
     }
     $state = STATE::CART_VIEW;
