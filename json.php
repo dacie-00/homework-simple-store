@@ -21,20 +21,20 @@ function getProductsFromJSON(string $filePath): array
 
 function validateProductsFromJSON($products)
 {
+    if (gettype($products) != "array") {
+        throw new Exception("JSON products must be in an array");
+    }
+
     $templateProduct = new stdClass();
     $templateProduct->name = "product";
     $templateProduct->price = 1;
     $templateProduct->quantity = 1;
 
-    if (gettype($products) != "array") {
-        throw new Exception("JSON products must be in an array");
-    }
-
     $productCount = count($products);
 
     foreach ($products as $index => $product) {
         if (gettype($product) !== gettype($templateProduct)) {
-            throw new Exception ("JSON product #$index/$productCount is not an object");
+            throw new Exception ("JSON product #$index/$productCount is not the correct type");
         }
         foreach ($templateProduct as $templateAttributeKey => $templateAttributeValue) {
             foreach ($product as $productAttributeKey => $productAttributeValue) {
