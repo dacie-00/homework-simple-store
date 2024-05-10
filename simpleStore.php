@@ -16,7 +16,7 @@
 //
 //!!!! THIS MUST BE DONE IN SEPARATE REPOSITORY !!!!
 
-require_once("Table.php");
+require_once("table.php");
 require_once("json.php");
 require_once("userInput.php");
 require_once("interact.php");
