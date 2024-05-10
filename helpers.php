@@ -39,10 +39,10 @@ function makeContainerTable($products, $summedPrice = false): array
     formatCurrencyForProducts($productsView);
     addProductIds($productsView);
     return [
-        Table::createColumn("ID", array_column($productsView, "id")),
-        Table::createColumn("Name", array_column($productsView, "name")),
-        Table::createColumn("Price", array_column($productsView, "price")),
-        Table::createColumn("Quantity", array_map(function ($v) {
+        tableCreateColumn("ID", array_column($productsView, "id")),
+        tableCreateColumn("Name", array_column($productsView, "name")),
+        tableCreateColumn("Price", array_column($productsView, "price")),
+        tableCreateColumn("Quantity", array_map(function ($v) {
             return (string)$v;
         }, array_column($productsView, "quantity")))
     ];

@@ -4,7 +4,7 @@ function storeView(&$store, &$cart, &$state): void
 {
 
     echo "STORE VIEW\n";
-    Table::display(
+    tableDisplay(
         makeContainerTable($store)
     );
 
@@ -66,7 +66,7 @@ function cartView(array &$store, array &$cart, int &$state): void
     if ($isCartEmpty) {
         echo "Your cart is empty!\n";
     } else {
-        Table::display(
+        tableDisplay(
             makeContainerTable($cart, true)
         );
         $totalPrice = formatCurrency(calculateProductTotalPrice($cart));
@@ -143,7 +143,7 @@ function purchase(array $cart, int &$state)
         }
     }
 
-    Table::display(
+    tableDisplay(
         makeContainerTable($cart, true)
     );
 
