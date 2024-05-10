@@ -48,15 +48,6 @@ function makeContainerTable($products, $summedPrice = false): array
     ];
 }
 
-function clearScreen() // TODO: decide if this should be used
-{
-    // I can't test other methods on Windows, so I'm using the hacky method just because I know it works.
-    for ($i = 0; $i < 50; $i++) {
-        echo "\n";
-    }
-    echo "\r";
-}
-
 function sortProducts(array &$products): void
 {
     usort($products, function ($a, $b) {
