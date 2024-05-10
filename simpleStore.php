@@ -23,7 +23,6 @@ require_once("interact.php");
 require_once("helpers.php");
 require_once("state.php");
 
-
 $storeProducts = getProductsFromJSON('products.json');
 validateProductsFromJSON($storeProducts);
 sortProducts($storeProducts);
