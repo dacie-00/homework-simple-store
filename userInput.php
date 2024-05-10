@@ -12,20 +12,20 @@ function getUserChoiceFromArray(array $choices, string $promptMessage = "input")
     }
 }
 
-function getUserChoiceFromRange(int $min, int $max, string $cancel = null, string $promptMessage = "input"): int
+function getUserChoiceFromRange(int $min, int $max, string $cancel = null, string $promptNoun = "input"): int
 {
     while (true) {
-        $choice = readline(ucfirst("$promptMessage - "));
+        $choice = readline(ucfirst("$promptNoun - "));
         if ($choice === $cancel) {
             return $choice;
         }
         if (!is_numeric($choice)) {
-            echo "Invalid $promptMessage!\n";
+            echo "Invalid $promptNoun!\n";
             continue;
         }
         $choice = (int)$choice;
         if ($choice < $min || $choice > $max) {
-            echo "Invalid $promptMessage!\n";
+            echo "Invalid $promptNoun!\n";
             continue;
         }
         return $choice;
