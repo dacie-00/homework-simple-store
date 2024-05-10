@@ -2,11 +2,29 @@
 
 function storeView(array $store, int &$state): void
 {
+    $isStoreEmpty = count($store) <= 0;
 
     echo "STORE VIEW\n";
-    tableDisplay(
-        makeContainerTable($store)
-    );
+    if ($isStoreEmpty) {
+        echo "There are no more items left in the store!\n";
+    } else {
+        tableDisplay(
+            makeContainerTable($store)
+        );
+    }
+
+    if ($isStoreEmpty) {
+        echo "1) View cart\n";
+        echo "2) Finalize purchase\n";
+        switch (getUserChoiceFromArray(["1", "2"], "choice")) {
+            case 1:
+                $state = STATE::CART_VIEW;
+                return;
+            case 2:
+                $state = STATE::PURCHASE;
+                return;
+        }
+    }
 
     if ($state === STATE::STORE_VIEW) {
         echo "1) Add item to cart\n";
