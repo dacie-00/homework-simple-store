@@ -18,9 +18,9 @@
 
 declare(strict_types=1);
 
-require_once ("Table.php");
-require_once ("json.php");
-require_once ("userInput.php");
+require_once("Table.php");
+require_once("json.php");
+require_once("userInput.php");
 
 function formatCurrency(int $amount): string
 {
@@ -79,13 +79,16 @@ function clearScreen() // TODO: decide if this should be used
     echo "\r";
 }
 
-function sortProducts(array &$products): void {
-    usort($products, function ($a, $b) {return $a->name < $b->name ? -1 : 1;});
+function sortProducts(array &$products): void
+{
+    usort($products, function ($a, $b) {
+        return $a->name < $b->name ? -1 : 1;
+    });
 }
 
 class Simulate
 {
-    static function store(&$store, &$cart, &$state): void
+    static function storeView(&$store, &$cart, &$state): void
     {
 
         echo "STORE VIEW\n";
@@ -115,33 +118,35 @@ class Simulate
             }
         }
 
-        if ($state === STATE::STORE_TAKE) {
-            $thingsInStore = [];
-            foreach ($store as $index => $product) {
-                if ($product->quantity > 0) {
-                    $thingsInStore[] = (string)($index + 1); // + 1 due to range starting at 1 instead of 0
-                }
-            }
-            echo "Enter the ID of the product you wish to add to your cart ('n' to cancel)\n";
-            $thingsInStore[] = "n";
-            $userChoice = getUserChoiceFromArray($thingsInStore, "product");
-            if ($userChoice !== "n") {
-                $userChoice -= 1; // - 1 due to range starting at 1 instead of 0
-                $productName = $store[$userChoice]->name;
-                $availableQuantity = $store[$userChoice]->quantity;
-                echo "Enter the quantity (1-$availableQuantity) of $productName you wish to add to your cart ('n' to cancel)\n";
-                $quantity = getUserChoiceFromRange(1, $availableQuantity, "n", "quantity");
-                if ($quantity !== "n") {
-                    addToContainer($cart, $store[$userChoice], $quantity);
-                    removeFromContainer($store, $store[$userChoice], $quantity);
-                    echo "$quantity $productName added to cart!\n";
-                }
-            }
-            $state = STATE::STORE_VIEW;
-        }
     }
 
-    static function cart(array &$store, array &$cart, int &$state): void
+    static function storeTake(array &$store, array &$cart, int &$state)
+    {
+        $thingsInStore = [];
+        foreach ($store as $index => $product) {
+            if ($product->quantity > 0) {
+                $thingsInStore[] = (string)($index + 1); // + 1 due to range starting at 1 instead of 0
+            }
+        }
+        echo "Enter the ID of the product you wish to add to your cart ('n' to cancel)\n";
+        $thingsInStore[] = "n";
+        $userChoice = getUserChoiceFromArray($thingsInStore, "product");
+        if ($userChoice !== "n") {
+            $userChoice -= 1; // - 1 due to range starting at 1 instead of 0
+            $productName = $store[$userChoice]->name;
+            $availableQuantity = $store[$userChoice]->quantity;
+            echo "Enter the quantity (1-$availableQuantity) of $productName you wish to add to your cart ('n' to cancel)\n";
+            $quantity = getUserChoiceFromRange(1, $availableQuantity, "n", "quantity");
+            if ($quantity !== "n") {
+                addToContainer($cart, $store[$userChoice], $quantity);
+                removeFromContainer($store, $store[$userChoice], $quantity);
+                echo "$quantity $productName added to cart!\n";
+            }
+        }
+        $state = STATE::STORE_VIEW;
+    }
+
+    static function cartView(array &$store, array &$cart, int &$state): void
     {
         $isCartEmpty = count($cart) <= 0;
 
@@ -185,32 +190,33 @@ class Simulate
                 $state = STATE::PURCHASE;
                 return;
         }
+    }
 
-        if ($state === STATE::CART_TAKE) {
-            $thingsInCart = [];
-            foreach ($cart as $index => $product) {
-                if ($product->quantity > 0) {
-                    $thingsInCart[] = (string)($index + 1); // + 1 due to range starting at 1 instead of 0
-                }
+    static function cartTake(array &$store, array &$cart, int &$state)
+    {
+        $thingsInCart = [];
+        foreach ($cart as $index => $product) {
+            if ($product->quantity > 0) {
+                $thingsInCart[] = (string)($index + 1); // + 1 due to range starting at 1 instead of 0
             }
-            echo "Enter the ID of the product you wish to remove from your cart ('n' to cancel)\n";
-            $thingsInCart[] = "n";
-            $userChoice = getUserChoiceFromArray($thingsInCart, "product");
-            if ($userChoice !== "n") {
-                $userChoice -= 1; // - 1 due to range starting at 1 instead of 0
-                $productName = $cart[$userChoice]->name;
-                $availableQuantity = $cart[$userChoice]->quantity;
-                echo "Enter the quantity (1-$availableQuantity) of $productName you wish to remove from your cart ('n' to cancel)\n";
-                $quantity = getUserChoiceFromRange(1, $availableQuantity, "n", "quantity");
-                if ($quantity !== "n") {
-                    addtoContainer($store, $cart[$userChoice], $quantity);
-                    removeFromContainer($cart, $cart[$userChoice], $quantity);
-                    sortProducts($store);
-                    echo "$quantity $productName removed from cart!\n";
-                }
-            }
-            $state = STATE::CART_VIEW;
         }
+        echo "Enter the ID of the product you wish to remove from your cart ('n' to cancel)\n";
+        $thingsInCart[] = "n";
+        $userChoice = getUserChoiceFromArray($thingsInCart, "product");
+        if ($userChoice !== "n") {
+            $userChoice -= 1; // - 1 due to range starting at 1 instead of 0
+            $productName = $cart[$userChoice]->name;
+            $availableQuantity = $cart[$userChoice]->quantity;
+            echo "Enter the quantity (1-$availableQuantity) of $productName you wish to remove from your cart ('n' to cancel)\n";
+            $quantity = getUserChoiceFromRange(1, $availableQuantity, "n", "quantity");
+            if ($quantity !== "n") {
+                addtoContainer($store, $cart[$userChoice], $quantity);
+                removeFromContainer($cart, $cart[$userChoice], $quantity);
+                sortProducts($store);
+                echo "$quantity $productName removed from cart!\n";
+            }
+        }
+        $state = STATE::CART_VIEW;
     }
 
     static function purchase(array $cart, int &$state)
@@ -307,10 +313,16 @@ $state = STATE::STORE_VIEW;
 while (true) {
     switch ($state) {
         case STATE::STORE_VIEW:
-            Simulate::store($storeProducts, $cart, $state);
+            Simulate::storeView($storeProducts, $cart, $state);
+            break;
+        case STATE::STORE_TAKE:
+            Simulate::storeTake($storeProducts, $cart, $state);
             break;
         case STATE::CART_VIEW:
-            Simulate::cart($storeProducts, $cart, $state);
+            Simulate::cartView($storeProducts, $cart, $state);
+            break;
+        case STATE::CART_TAKE:
+            Simulate::cartTake($storeProducts, $cart, $state);
             break;
         case STATE::PURCHASE:
             Simulate::purchase($cart, $state);
